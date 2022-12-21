@@ -8,12 +8,13 @@
 import UIKit
 import SnapKit
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate ,UIFontPickerViewControllerDelegate{
 
     let photoView = UIImageView()
     let nameText = UITextField()
     let dateField = UITextField()
     let datePicker = UIDatePicker()
+    let fontButton = UIButton()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,6 +26,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         //To Tap into ImageView
         let photoGesture = UITapGestureRecognizer(target: self, action: #selector(pickPhotoAction))
         photoView.isUserInteractionEnabled = true
+        photoView.translatesAutoresizingMaskIntoConstraints = false
         photoView.addGestureRecognizer(photoGesture)
 
     }
@@ -34,8 +36,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         view.addSubview(photoView)
         view.addSubview(nameText)
         view.addSubview(dateField)
+        view.addSubview(fontButton)
         
-        photoView.translatesAutoresizingMaskIntoConstraints = false
         
         photoView.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(80)
@@ -67,7 +69,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         dateField.borderStyle = .roundedRect
         dateField.textAlignment = .center
         
+        fontButton.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().offset(-40)
+            make.centerX.equalToSuperview()
+            make.height.equalTo(40)
+            make.width.equalTo(100)
+        }
+        fontButton.backgroundColor = .green
+        fontButton.setTitle("Font", for: .normal)
+        fontButton.layer.cornerRadius = 10
+        fontButton.addTarget(self, action: #selector(changeFont), for: .touchUpInside)
     }
+ 
+    
     //IMAGE PICKER
     @objc func pickPhotoAction(){
         let picker = UIImagePickerController()
@@ -88,19 +102,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         datePicker.preferredDatePickerStyle = .inline
         datePicker.datePickerMode = .date
         dateField.inputView = datePicker
-        dateField.inputAccessoryView = createToolBar()
+        dateField.inputAccessoryView = createToolBarForDate()
     }
     
     //DATE PICKER TOOL BAR
-    func createToolBar()-> UIToolbar {
+    func createToolBarForDate()-> UIToolbar {
         let toolBar = UIToolbar()
         toolBar.sizeToFit()
-        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(donePressed))
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(donePressed1))
         toolBar.setItems([doneButton], animated: true)
         return toolBar
     }
    
-    @objc func donePressed(){
+    @objc func donePressed1(){
         let dateFormater = DateFormatter()
         dateFormater.dateStyle = .medium
         dateFormater.timeStyle = .none
@@ -108,6 +122,25 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         dateField.text = dateFormater.string(from: datePicker.date)
     }
     
+    //FONT PICKER
+   
+    @objc func changeFont(){
+        let config = UIFontPickerViewController.Configuration()
+        config.includeFaces = false
+        let fontPicker = UIFontPickerViewController(configuration: config)
+        fontPicker.delegate = self
+        present(fontPicker, animated: true)
+    }
+  
+    func fontPickerViewControllerDidCancel(_ viewController: UIFontPickerViewController) {
+        viewController.dismiss(animated: true)
+    }
     
+    func fontPickerViewControllerDidPickFont(_ viewController: UIFontPickerViewController) {
+        viewController.dismiss(animated: true)
+        guard let descriptor = viewController.selectedFontDescriptor else {return}
+        nameText.font = UIFont(descriptor: descriptor, size: 24)
+        
+    }
     
 }
